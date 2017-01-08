@@ -20,21 +20,47 @@ Performs the below tasks:
 ### HTTP/HTTPS
 
 ```javascript
+const http = require("http");
+const proxiable = require("../proxiable");
 
 // Setup signal handlers so process exit event can be triggered
-[ "SIGINT", "SIGTERM" ].forEach(signal => process.on(signal, process.exit));
+[ "SIGINT", "SIGTERM", "SIGHUP" ].forEach(signal => process.on(signal, process.exit));
 
-require("proxiable")("/var/run/example.pid");
+// Terminate with core dump
+process.on("SIGQUIT", process.abort);
+
+const server = http.createServer((req, res) => {
+    res.end();
+});
+
+server.on("clientError", (err, socket) => {
+    socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+});
+
+proxiable(server).listen("/var/run/example.sock");
 ```
 
 ### Express
 
 ```javascript
+const express = require("express");
+const http = require("http");
+const proxiable = require("proxiable");
 
 // Setup signal handlers so process exit event can be triggered
-[ "SIGINT", "SIGTERM" ].forEach(signal => process.on(signal, process.exit));
+[ "SIGINT", "SIGTERM", "SIGHUP" ].forEach(signal => process.on(signal, process.exit));
 
-require("proxiable")("/var/run/example.pid");
+// Terminate with core dump
+process.on("SIGQUIT", process.abort);
+
+const app = express();
+const server = http.createServer(app);
+
+app.get("/", function(req, res) {
+    res.send("Hello World!");
+});
+
+proxiable(server).listen("/var/run/example.sock");
 ```
 
 ## Debug
