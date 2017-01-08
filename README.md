@@ -10,6 +10,7 @@ Performs the below tasks:
 
 1. On server listening will chmod the socket file to 666 to allow proxying from another process.
 2. On process exit ensure server.close is called so our UNIX domain socket is unlinked.
+3. If specified UNIX domain socket path already exists check if it is an orphaned and if so, unlink it.
 
 ## Install
 
