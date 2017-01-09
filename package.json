@@ -1,6 +1,6 @@
 {
   "name": "proxiable",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Makes a UNIX domain socket server proxiable and helps our server cleanup after itself to prevent EADDRINUSE exceptions.",
   "main": "proxiable.js",
   "scripts": {

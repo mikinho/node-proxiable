@@ -15,6 +15,7 @@
 
 "use strict";
 
+const cluster = require("cluster");
 const fs = require("fs");
 const net = require("net");
 const util = require("util");
@@ -173,3 +174,19 @@ module.exports = exports = function(server) {
 
     return server;
 };
+
+/**
+ * If we are clustered we need to do a more manual cleanup
+ */
+if (cluster.isMaster) {
+    cluster.once("listening", function(worker, address) {
+        // unlink our unix domain socket
+        if (-1 === address.addressType) {
+            isSocket(address.address, function(err, isSocket) {
+                if (isSocket) {
+                    process.on("exit", () => fs.unlink(address.address, noop));
+                }
+            });
+        }
+    });
+}
